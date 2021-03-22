@@ -7,6 +7,8 @@ import yfinance as yf
 import pandas as pd
 from datetime import datetime
 
+startTime = datetime.now()
+
 tickers = gt.get_tickers()
 
 tickers = sorted(tickers)
@@ -43,3 +45,4 @@ for ticker in tickers:
 dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
 stock_df.to_csv(f'Value Stocks as of {dateString}')
 
+print(datetime.now()-startTime)
