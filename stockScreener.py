@@ -2,14 +2,12 @@
 # so what i may be able to do is call ticker.info and pull from that dict
 # need to convert it into its own dict but yep worked
 
-from get_all_tickers import get_tickers as gt
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
+from tickerList import tickers
 
 startTime = datetime.now()
-
-tickers = gt.get_tickers()
 
 tickers = sorted(tickers)
 
