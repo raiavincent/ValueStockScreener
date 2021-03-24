@@ -19,23 +19,24 @@ stock_df = pd.DataFrame(columns=cols)
 # TODO: create an imported function to get med PE of SP500
 medianPE = 15   
 
-print('TICKER     PB RATIO     TRAILING PE')
 for ticker in tickers:
     try:
         stock = yf.Ticker(ticker)
         stockInfo = stock.info
         pbRatio = stockInfo.get('priceToBook')
-        # pbRatio = round(pbRatio,2)
         trailingPE = stockInfo.get('trailingPE')
-        # trailingPE = round(trailingPE,2)
-        # ticker = ticker.ljust(5)
-        # pbRatio = pbRatio.ljust(9)
-        if pbRatio < 1 and trailingPE < medianPE:
-            print(ticker,pbRatio,trailingPE)
+        sector = stockInfo.get('sector')
+        industry = stockInfo.get('industry')
+        dividend = stockInfo.get('dividendRate')
+        if pbRatio < 1 and trailingPE < medianPE and dividend > 0:
+            print(ticker,sector,industry,pbRatio,trailingPE,dividend)
             stockDict = {}
             stockDict['Ticker'] = ticker
+            stockDict['Sector'] = sector
+            stockDict['Industry'] = industry
             stockDict['Price to Book'] = pbRatio
             stockDict['Trailing PE'] = trailingPE
+            stockDict['Dividend Rate'] = dividend
             stock_df = stock_df.append(stockDict,ignore_index=True)
     except:
         pass
