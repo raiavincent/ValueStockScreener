@@ -11,7 +11,7 @@ startTime = datetime.now()
 
 tickers = sorted(tickers)
 
-cols = ['Ticker','Price to Book', 'Trailing PE']
+cols = ['Ticker','Sector','Industry','Price to Book', 'Trailing PE','Dividend Rate']
 
 stock_df = pd.DataFrame(columns=cols)
 
