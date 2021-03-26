@@ -6,8 +6,11 @@ import yfinance as yf
 import pandas as pd
 from datetime import datetime
 from tickerList import tickers
+import gspread
 
 startTime = datetime.now()
+
+gc = gspread.service_account()
 
 tickers = sorted(tickers)
 
@@ -43,5 +46,9 @@ for ticker in tickers:
 
 dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
 stock_df.to_csv(f'Value Stocks as of {dateString}')
+
+worksheet = gc.create(f'Value Stocks as of {dateString}')
+
+worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
 
 print(datetime.now()-startTime)
