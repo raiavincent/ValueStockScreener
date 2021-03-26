@@ -10,8 +10,6 @@ import gspread
 
 startTime = datetime.now()
 
-gc = gspread.service_account()
-
 tickers = sorted(tickers)
 
 cols = ['Ticker','Sector','Industry','Price to Book', 'Trailing PE','Dividend Rate']
@@ -47,7 +45,11 @@ for ticker in tickers:
 dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
 stock_df.to_csv(f'Value Stocks as of {dateString}')
 
-worksheet = gc.create(f'Value Stocks as of {dateString}')
+gc = gspread.oauth()
+
+sh = gc.create(f'Value Stocks as of {dateString}')
+
+worksheet = sh.get_worksheet(0)
 
 worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
 
