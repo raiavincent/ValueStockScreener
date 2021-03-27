@@ -7,7 +7,8 @@ import pandas as pd
 from datetime import datetime
 from tickerList import tickers
 import gspread
-from secrets import valueStockFolderId, dashboardURL
+from stockSecrets import valueStockFolderId, dashboardURL
+import stockquotes
 
 startTime = datetime.now()
 
@@ -30,17 +31,20 @@ for ticker in tickers:
         sector = stockInfo.get('sector')
         industry = stockInfo.get('industry')
         dividend = stockInfo.get('dividendRate')
+        stockObj = stockquotes.Stock(ticker)
+        currentPrice = stockObj.current_price
         if pbRatio < 1 and trailingPE < medianPE and dividend > 0:
-            print(ticker,sector,industry,pbRatio,trailingPE,dividend)
+            print(ticker,currentPrice,sector,industry,pbRatio,trailingPE,dividend)
             stockDict = {}
             stockDict['Ticker'] = ticker
+            stockDict['Price'] = currentPrice
             stockDict['Sector'] = sector
             stockDict['Industry'] = industry
             stockDict['Price to Book'] = pbRatio
             stockDict['Trailing PE'] = trailingPE
             stockDict['Dividend Rate'] = dividend
             stock_df = stock_df.append(stockDict,ignore_index=True)
-    except:
+    except Exception:
         pass
 
 dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')

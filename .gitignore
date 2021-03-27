@@ -1,3 +1,4 @@
 
 *.json
 secrets.py
+stockSecrets.py
