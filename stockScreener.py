@@ -7,6 +7,7 @@ import pandas as pd
 from datetime import datetime
 from tickerList import tickers
 import gspread
+from secrets import valueStockFolderId, dashboardURL
 
 startTime = datetime.now()
 
@@ -47,10 +48,24 @@ stock_df.to_csv(f'Value Stocks as of {dateString}')
 
 gc = gspread.oauth()
 
-sh = gc.create(f'Value Stocks as of {dateString}')
+sh = gc.create(f'Value Stocks as of {dateString}',folder_id=valueStockFolderId)
 
 worksheet = sh.get_worksheet(0)
 
 worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
+
+db = gc.open_by_url(dashboardURL)
+
+dbws = db.get_worksheet(0)
+
+# need to clear the first sheet before we can add all the new info
+# z1000 is probably overkill but would rather over kill than underkill
+
+range_of_cells = dbws.range('A1:Z1000')
+for cell in range_of_cells:
+    cell.value = ''
+dbws.update_cells(range_of_cells)
+
+dbws.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
 
 print(datetime.now()-startTime)
