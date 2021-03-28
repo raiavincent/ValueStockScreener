@@ -49,8 +49,6 @@ for ticker in tickers:
     except Exception:
         pass
 
-dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
-
 gc = gspread.oauth()
 
 sh = gc.create(f'Value Stocks as of {dateString}',folder_id=valueStockFolderId)
