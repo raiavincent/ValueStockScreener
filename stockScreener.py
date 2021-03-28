@@ -21,7 +21,7 @@ cols = ['Ticker','Price','Sector','Industry','Price to Book', 'Trailing PE','Div
 stock_df = pd.DataFrame(columns=cols)
 
 # median PE ratio of the SP 500
-# TODO: create an imported function to get med PE of SP500
+# TODO create an imported function to get med PE of SP500
 medianPE = 15   
 
 for ticker in tickers:
