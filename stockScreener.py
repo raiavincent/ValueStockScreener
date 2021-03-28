@@ -12,6 +12,8 @@ import stockquotes
 
 startTime = datetime.now()
 
+dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
+
 tickers = sorted(tickers)
 
 cols = ['Ticker','Price','Sector','Industry','Price to Book', 'Trailing PE','Dividend Rate']
@@ -48,7 +50,6 @@ for ticker in tickers:
         pass
 
 dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
-stock_df.to_csv(f'Value Stocks as of {dateString}')
 
 gc = gspread.oauth()
 
@@ -60,7 +61,8 @@ worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
 
 db = gc.open_by_url(dashboardURL)
 
-dbws = db.get_worksheet(0)
+# changing this over to the second sheet so the dashboard can be the first sheet
+dbws = db.get_worksheet(1)
 
 # need to clear the first sheet before we can add all the new info
 # z1000 is probably overkill but would rather over kill than underkill
