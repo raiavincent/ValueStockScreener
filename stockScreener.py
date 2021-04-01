@@ -44,7 +44,7 @@ stock_df.fillna('N/A',inplace=True)
 
 tickerCount = len(stock_df.index)
 tickerCount = '{:,}'.format(tickerCount)
-print(f'Pulled {tickerCount} stocks on {dateString}'.format(tickerCount))
+print(f'Pulled {tickerCount} stocks on {dateString}')
 
 # gc authorizes and lets us access the spreadsheets
 gc = gspread.oauth()
