@@ -1,73 +1,60 @@
-import yfinance as yf
 import pandas as pd
 from datetime import datetime
 import gspread
 from stockSecrets import valueStockFolderId, dashboardURL
 import stockquotes
-from get_all_tickers import get_tickers as gt
+import stockAttribPuller as sap
+from stockCols import cols
+import importlib
 import schedule
 import time
 
 def getStocks():
     # start timer
     startTime = datetime.now()
+    importlib.reload(sap)
     
     # create dateString to get the date for the sheet
     dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
     
     # sort tickers, not sure why, but I did
-    tickers = sorted(gt.get_tickers())
-    
-    # establish database names and the dataframe
-    cols = (['Ticker','Price','Sector','Industry','Price to Book',
-             'Trailing PE','Dividend Rate'])
-    
-    stock_df = pd.DataFrame(columns=cols)
-    
-    # median PE ratio of the SP 500, using 15 for now until function made
-    # TODO create an imported function to get med PE of SP500
-    medianPE = 15   
+    from tickerList import tickers
+    tickers = sorted(tickers) 
     
     # ticker.info is used from yf to create a json that I can pull from
     # called for each ticker in the list
     # store that json as its own variable and pull the data
     # stockquotes module is used to get the current price of the ticker object
+    
+    stock_df = pd.DataFrame()
+    index = 1
     for ticker in tickers:
-        # try except statement to get around any data that may not be available 
-        # and causing errors
         try:
-            stock = yf.Ticker(ticker)
-            stockInfo = stock.info
-            pbRatio = stockInfo.get('priceToBook')
-            trailingPE = stockInfo.get('trailingPE')
-            sector = stockInfo.get('sector')
-            industry = stockInfo.get('industry')
-            dividend = stockInfo.get('dividendRate')
+            ticker_df = sap.pullStocks(ticker)
             stockObj = stockquotes.Stock(ticker)
             currentPrice = stockObj.current_price
-            if pbRatio < 1 and trailingPE < medianPE and dividend > 0:
-                print(ticker,currentPrice,sector,industry,pbRatio,
-                       trailingPE,dividend)
-                stockDict = {}
-                stockDict['Ticker'] = ticker
-                stockDict['Price'] = currentPrice
-                stockDict['Sector'] = sector
-                stockDict['Industry'] = industry
-                stockDict['Price to Book'] = pbRatio
-                stockDict['Trailing PE'] = trailingPE
-                stockDict['Dividend Rate'] = dividend
-                stock_df = stock_df.append(stockDict,ignore_index=True)
+            ticker_df['Price'] = currentPrice
+            # current price is not being added here
+            stock_df = stock_df = stock_df.append(ticker_df,ignore_index=True)
+            print(index, ticker)
+            index += 1
         except Exception:
-            # need to add Exception to except statement to allow for 
-            # keyboard interrupt
             pass
+        
+    stock_df = stock_df[cols]
+    stock_df = stock_df.dropna(axis=1,how='all')
+    stock_df.fillna('N/A',inplace=True)
+    
+    tickerCount = len(stock_df.index)
+    tickerCount = '{:,}'.format(tickerCount)
+    print(f'Pulled {tickerCount} stocks on {dateString}'.format(tickerCount))
     
     # gc authorizes and lets us access the spreadsheets
     gc = gspread.oauth()
     
     # create the workbook where the day's data will go
     # add in folder_id to place it in the folder we want
-    sh = gc.create(f'Value Stocks as of {dateString}',folder_id=valueStockFolderId)
+    sh = gc.create(f'Stock sheet as of {dateString}',folder_id=valueStockFolderId)
     
     # access the first sheet of that newly created workbook
     worksheet = sh.get_worksheet(0)
