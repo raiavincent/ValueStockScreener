@@ -39,42 +39,43 @@ for ticker in tickers:
         pass
     
 stock_df = stock_df[cols]
-stock_df.fillna('',inplace=True)
+stock_df = stock_df.dropna(axis=1,how='all')
+stock_df.fillna('N/A',inplace=True)
 
 tickerCount = len(stock_df.index)
 tickerCount = '{:,}'.format(tickerCount)
 print(f'Pulled {tickerCount} stocks on {dateString}'.format(tickerCount))
 
-# # gc authorizes and lets us access the spreadsheets
-# gc = gspread.oauth()
+# gc authorizes and lets us access the spreadsheets
+gc = gspread.oauth()
 
-# # create the workbook where the day's data will go
-# # add in folder_id to place it in the folder we want
-# sh = gc.create(f'Value Stocks as of {dateString}',folder_id=valueStockFolderId)
+# create the workbook where the day's data will go
+# add in folder_id to place it in the folder we want
+sh = gc.create(f'Stock sheet as of {dateString}',folder_id=valueStockFolderId)
 
-# # access the first sheet of that newly created workbook
-# worksheet = sh.get_worksheet(0)
+# access the first sheet of that newly created workbook
+worksheet = sh.get_worksheet(0)
 
-# # edit the worksheet with the created dataframe for the day's data
-# worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
+# edit the worksheet with the created dataframe for the day's data
+worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
 
-# # open the main workbook with that workbook's url
-# db = gc.open_by_url(dashboardURL)
+# open the main workbook with that workbook's url
+db = gc.open_by_url(dashboardURL)
 
-# # changed this over to the second sheet so the dashboard can be the first sheet
-# # dbws is the database worksheet, as in the main workbook that is updated and
-# # used to analyze and pick from
-# dbws = db.get_worksheet(1)
+# changed this over to the second sheet so the dashboard can be the first sheet
+# dbws is the database worksheet, as in the main workbook that is updated and
+# used to analyze and pick from
+dbws = db.get_worksheet(1)
 
-# # below clears the stock sheet so it can be overwritten with updates
-# # z1000 is probably overkill but would rather over kill than underkill
-# range_of_cells = dbws.range('A1:Z1000')
-# for cell in range_of_cells:
-#     cell.value = ''
-# dbws.update_cells(range_of_cells)
+# below clears the stock sheet so it can be overwritten with updates
+# z1000 is probably overkill but would rather over kill than underkill
+range_of_cells = dbws.range('A1:Z1000')
+for cell in range_of_cells:
+    cell.value = ''
+dbws.update_cells(range_of_cells)
 
-# # update the stock spreadsheet in the database workbook with the stock_df
-# dbws.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
+# update the stock spreadsheet in the database workbook with the stock_df
+dbws.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
 
-# # output total time to run this script
-# print(datetime.now()-startTime)
+# output total time to run this script
+print(datetime.now()-startTime)
