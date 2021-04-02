@@ -5,7 +5,6 @@ import gspread
 from stockSecrets import valueStockFolderId, dashboardURL
 import stockquotes
 import stockAttribPuller as sap
-from stockCols import cols
 import importlib
 
 # start timer
