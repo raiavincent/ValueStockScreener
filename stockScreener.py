@@ -38,9 +38,9 @@ for ticker in tickers:
     except Exception:
         pass
     
-stock_df = stock_df[cols]
 stock_df = stock_df.dropna(axis=1,how='all')
-stock_df.fillna('N/A',inplace=True)
+stock_df.fillna('',inplace=True)
+stock_df = stock_df.applymap(str)
 
 tickerCount = len(stock_df.index)
 tickerCount = '{:,}'.format(tickerCount)
