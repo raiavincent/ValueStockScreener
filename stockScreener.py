@@ -81,19 +81,18 @@ dbws.update_cells(range_of_cells)
 # update the stock spreadsheet in the database workbook with the stock_df
 # need to specify this as user entered to keep the data type
 dbws.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
-dbws.update_cells(range_of_cells,value_input_option='USER_ENTERED')
 
 spreadsheetId = '1HeC6PSsaWS0Qj87nNXO8l-DpiLZJKVMH9QsRnQW01w4'  # Please set the Spreadsheet ID.
 sheetName = "Data"  # Please set the sheet name.
 
 spreadsheet = gc.open_by_key(spreadsheetId)
-sheetId = spreadsheet.worksheet(sheetName)._properties[dataID]
+sheetId = spreadsheet.worksheet(sheetName)._properties['229668247']
 
 requests = {
     "requests": [
         {
             "findReplace": {
-                "sheetId": dataID,
+                "sheetId": sheetId,
                 "find": "^'",
                 "searchByRegex": True,
                 "includeFormulas": True,
