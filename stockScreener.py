@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime
 from tickerList import tickers
 import gspread
-from stockSecrets import valueStockFolderId, dashboardURL
+from stockSecrets import valueStockFolderId, dashboardURL, dataID
 import stockquotes
 import stockAttribPuller as sap
 import importlib
@@ -40,6 +40,9 @@ for ticker in tickers:
 stock_df = stock_df.dropna(axis=1,how='all')
 stock_df.fillna('',inplace=True)
 stock_df = stock_df.applymap(str)
+# need to change 52WeekChange column name because BigQuery does not like 
+# columns that start with numbers
+stock_df = stock_df.rename(columns={'52WeekChange':'WeekChange52'})
 
 tickerCount = len(stock_df.index)
 tickerCount = '{:,}'.format(tickerCount)
@@ -57,6 +60,8 @@ worksheet = sh.get_worksheet(0)
 
 # edit the worksheet with the created dataframe for the day's data
 worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
+range_of_cells = worksheet.range('A1:CZ10000')
+worksheet.update_cells(range_of_cells,value_input_option='USER_ENTERED')
 
 # open the main workbook with that workbook's url
 db = gc.open_by_url(dashboardURL)
@@ -68,13 +73,37 @@ dbws = db.get_worksheet(1)
 
 # below clears the stock sheet so it can be overwritten with updates
 # z1000 is probably overkill but would rather over kill than underkill
-range_of_cells = dbws.range('A1:Z1000')
+range_of_cells = dbws.range('A1:CZ10000')
 for cell in range_of_cells:
     cell.value = ''
 dbws.update_cells(range_of_cells)
 
 # update the stock spreadsheet in the database workbook with the stock_df
+# need to specify this as user entered to keep the data type
 dbws.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
+dbws.update_cells(range_of_cells,value_input_option='USER_ENTERED')
+
+spreadsheetId = '1HeC6PSsaWS0Qj87nNXO8l-DpiLZJKVMH9QsRnQW01w4'  # Please set the Spreadsheet ID.
+sheetName = "Data"  # Please set the sheet name.
+
+spreadsheet = gc.open_by_key(spreadsheetId)
+sheetId = spreadsheet.worksheet(sheetName)._properties[dataID]
+
+requests = {
+    "requests": [
+        {
+            "findReplace": {
+                "sheetId": dataID,
+                "find": "^'",
+                "searchByRegex": True,
+                "includeFormulas": True,
+                "replacement": ""
+            }
+        }
+    ]
+}
+
+spreadsheet.batch_update(requests)
 
 # output total time to run this script
 print(datetime.now()-startTime)
