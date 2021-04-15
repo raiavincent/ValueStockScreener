@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime
 from tickerList import tickers
 import gspread
-from stockSecrets import valueStockFolderId, dashboardURL, dataID
+from stockSecrets import valueStockFolderId, dashboardURL, dbId
 import stockquotes
 import stockAttribPuller as sap
 import importlib
@@ -82,11 +82,12 @@ dbws.update_cells(range_of_cells)
 # need to specify this as user entered to keep the data type
 dbws.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
 
-spreadsheetId = '1HeC6PSsaWS0Qj87nNXO8l-DpiLZJKVMH9QsRnQW01w4'  # Please set the Spreadsheet ID.
+# unstringify the strung data for SQL purposes
+spreadsheetId = dbId  # Please set the Spreadsheet ID.
 sheetName = "Data"  # Please set the sheet name.
 
 spreadsheet = gc.open_by_key(spreadsheetId)
-sheetId = spreadsheet.worksheet(sheetName)._properties['229668247']
+sheetId = spreadsheet.worksheet(sheetName)._properties['sheetId']
 
 requests = {
     "requests": [
