@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import datetime
 import gspread
-from stockSecrets import valueStockFolderId, dashboardURL
+from stockSecrets import valueStockFolderId, dashboardURL, dbId
 import stockquotes
 import stockAttribPuller as sap
 import importlib
@@ -17,7 +17,6 @@ def getStocks():
     dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
     
     # sort tickers, not sure why, but I did
-    from tickerList import tickers
     tickers = sorted(tickers) 
     
     # ticker.info is used from yf to create a json that I can pull from
@@ -41,12 +40,15 @@ def getStocks():
             pass
         
     stock_df = stock_df.dropna(axis=1,how='all')
-    stock_df.fillna('N/A',inplace=True)
+    stock_df.fillna('',inplace=True)
     stock_df = stock_df.applymap(str)
+    # need to change 52WeekChange column name because BigQuery does not like 
+    # columns that start with numbers
+    stock_df = stock_df.rename(columns={'52WeekChange':'WeekChange52'})
     
     tickerCount = len(stock_df.index)
     tickerCount = '{:,}'.format(tickerCount)
-    print(f'Pulled {tickerCount} stocks on {dateString}')
+    print(f'Pulled {tickerCount} stocks on {dateString}'.format(tickerCount))
     
     # gc authorizes and lets us access the spreadsheets
     gc = gspread.oauth()
@@ -60,6 +62,8 @@ def getStocks():
     
     # edit the worksheet with the created dataframe for the day's data
     worksheet.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
+    range_of_cells = worksheet.range('A1:CZ10000')
+    worksheet.update_cells(range_of_cells,value_input_option='USER_ENTERED')
     
     # open the main workbook with that workbook's url
     db = gc.open_by_url(dashboardURL)
@@ -71,13 +75,37 @@ def getStocks():
     
     # below clears the stock sheet so it can be overwritten with updates
     # z1000 is probably overkill but would rather over kill than underkill
-    range_of_cells = dbws.range('A1:Z1000')
+    range_of_cells = dbws.range('A1:CZ10000')
     for cell in range_of_cells:
         cell.value = ''
     dbws.update_cells(range_of_cells)
     
     # update the stock spreadsheet in the database workbook with the stock_df
+    # need to specify this as user entered to keep the data type
     dbws.update([stock_df.columns.values.tolist()] + stock_df.values.tolist())
+    
+    # unstringify the strung data for SQL purposes
+    spreadsheetId = dbId  # Please set the Spreadsheet ID.
+    sheetName = "Data"  # Please set the sheet name.
+    
+    spreadsheet = gc.open_by_key(spreadsheetId)
+    sheetId = spreadsheet.worksheet(sheetName)._properties['sheetId']
+    
+    requests = {
+        "requests": [
+            {
+                "findReplace": {
+                    "sheetId": sheetId,
+                    "find": "^'",
+                    "searchByRegex": True,
+                    "includeFormulas": True,
+                    "replacement": ""
+                }
+            }
+        ]
+    }
+    
+    spreadsheet.batch_update(requests)
     
     # output total time to run this script
     print(datetime.now()-startTime)
