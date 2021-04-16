@@ -7,6 +7,7 @@ import stockAttribPuller as sap
 import importlib
 import schedule
 import time
+from tickerList import tickers
 
 def getStocks():
     # start timer
