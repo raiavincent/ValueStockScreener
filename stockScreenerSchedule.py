@@ -76,7 +76,7 @@ def getStocks():
     
     # below clears the stock sheet so it can be overwritten with updates
     # z1000 is probably overkill but would rather over kill than underkill
-    range_of_cells = dbws.range('A1:CZ10000')
+    range_of_cells = dbws.range('A1:CU10000')
     for cell in range_of_cells:
         cell.value = ''
     dbws.update_cells(range_of_cells)
