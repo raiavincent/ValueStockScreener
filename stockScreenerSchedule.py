@@ -7,12 +7,13 @@ import stockAttribPuller as sap
 import importlib
 import schedule
 import time
-from tickerList import tickers
+
 
 def getStocks():
     # start timer
     startTime = datetime.now()
     importlib.reload(sap)
+    from tickerList import tickers
     
     # create dateString to get the date for the sheet
     dateString = datetime.strftime(datetime.now(), '%Y_%m_%d')
@@ -76,7 +77,7 @@ def getStocks():
     
     # below clears the stock sheet so it can be overwritten with updates
     # z1000 is probably overkill but would rather over kill than underkill
-    range_of_cells = dbws.range('A1:CZ10000')
+    range_of_cells = dbws.range('A1:CU10000')
     for cell in range_of_cells:
         cell.value = ''
     dbws.update_cells(range_of_cells)
