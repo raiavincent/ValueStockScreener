@@ -2,6 +2,22 @@ import yfinance as yf
 import pandas as pd
 
 def pullStocks(ticker):
+    '''
+    This function pulls down all necessary info for a stock we are adding to
+    a dataframe and creates its own singular dataframe. In the main script, it
+    appends all of the stock dataframes into one.
+
+    Parameters
+    ----------
+    ticker : str
+        The ticker of the stock we are currently pulling info for.
+
+    Returns
+    -------
+    stock_df : dataframe
+        A dataframe of stock information.
+
+    '''
     stock_df = pd.DataFrame()
     try:
         stock = yf.Ticker(ticker)

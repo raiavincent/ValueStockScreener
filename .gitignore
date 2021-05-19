@@ -2,3 +2,5 @@
 *.json
 secrets.py
 stockSecrets.py
+dateRangeTesting.py
+datevars.py
