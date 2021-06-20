@@ -8,7 +8,6 @@ import importlib
 import schedule
 import time
 
-
 def getStocks():
     # start timer
     startTime = datetime.now()

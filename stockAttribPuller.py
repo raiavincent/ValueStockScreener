@@ -23,6 +23,7 @@ def pullStocks(ticker):
         stock = yf.Ticker(ticker)
         stockInfo = stock.info
         stock_df = stock_df.append(stockInfo,ignore_index=True)
+        stock_df = stock_df.drop(['uuid'])
     except Exception:
         # need to add Exception to except statement to allow for 
         # keyboard interrupt
